@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MKN-10 tahák</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230f766e'/><path d='M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z' fill='white'/></svg>">
+<script>try { const t = localStorage.getItem("mkn10.theme"); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --surface-2: #f0f4f5;
+  --border: #dde3e7;
+  --text: #1c2730;
+  --muted: #637381;
+  --accent: #0f766e;
+  --accent-soft: #e0f2f0;
+  --accent-text: #ffffff;
+  --star: #e8a200;
+  --mark: #fff1b8;
+  --active: #e6f4f2;
+  --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #11171c;
+    --surface: #182129;
+    --surface-2: #1f2a33;
+    --border: #2b3843;
+    --text: #e3e9ee;
+    --muted: #8d9ba7;
+    --accent: #2bb3a5;
+    --accent-soft: #173b39;
+    --accent-text: #06201e;
+    --star: #f5b82e;
+    --mark: #5a4a12;
+    --active: #1d3533;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #11171c;
+  --surface: #182129;
+  --surface-2: #1f2a33;
+  --border: #2b3843;
+  --text: #e3e9ee;
+  --muted: #8d9ba7;
+  --accent: #2bb3a5;
+  --accent-soft: #173b39;
+  --accent-text: #06201e;
+  --star: #f5b82e;
+  --mark: #5a4a12;
+  --active: #1d3533;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+
+header {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--bg);
+  padding: 16px 0 10px;
+  border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.brand h1 { font-size: 18px; margin: 0; }
+.brand span { color: var(--muted); font-size: 13px; }
+
+.search { position: relative; }
+.search svg { position: absolute; left: 14px; top: 16px; color: var(--muted); pointer-events: none; }
+#q {
+  width: 100%;
+  display: block;
+  padding: 13px 44px 13px 44px;
+  font: inherit;
+  font-size: 17px;
+  line-height: 1.4;
+  resize: none;
+  overflow-y: auto;
+  max-height: 40vh;
+  color: var(--text);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  outline: none;
+  box-shadow: var(--shadow);
+}
+#q:focus { border-color: var(--accent); }
+#clear {
+  position: absolute; right: 8px; top: 9px;
+  border: 0; background: transparent; color: var(--muted);
+  font-size: 22px; line-height: 1; width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+  display: none;
+}
+#clear:hover { background: var(--surface-2); }
+
+#favBar { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+#favBar:empty { display: none; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  max-width: 100%;
+  padding: 4px 6px 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); }
+.chip b { font-family: ui-monospace, Consolas, monospace; color: var(--accent); }
+.chip .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; color: var(--muted); }
+.chip .x { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; padding: 0 3px; border-radius: 50%; }
+.chip .x:hover { color: var(--text); }
+.favLabel { font-size: 12px; color: var(--star); font-weight: 600; align-self: center; margin-right: 2px; }
+
+main { padding: 14px 0 40px; }
+section { margin-bottom: 22px; }
+.sec-head { display: flex; align-items: center; justify-content: space-between; margin: 0 0 8px; }
+.sec-head h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0; }
+.link { border: 0; background: none; color: var(--accent); cursor: pointer; font-size: 13px; padding: 2px 4px; }
+.link:hover { text-decoration: underline; }
+
+.list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.group-title {
+  padding: 7px 14px;
+  font-size: 12px; font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.row {
+  display: grid;
+  grid-template-columns: 78px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 8px 5px 14px;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+}
+.list > .row:first-child, .group-title + .row { border-top: 0; }
+.row:hover, .row.active { background: var(--active); }
+.code { font-family: ui-monospace, Consolas, monospace; font-weight: 700; font-size: 14.5px; }
+.name { min-width: 0; }
+.name .ch { display: block; font-size: 12px; color: var(--muted); }
+.badge { font-size: 11px; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; margin-left: 6px; white-space: nowrap; }
+mark { background: var(--mark); color: inherit; border-radius: 2px; }
+.star {
+  border: 0; background: transparent; cursor: pointer;
+  width: 34px; height: 34px; border-radius: 8px;
+  color: var(--border); font-size: 21px; line-height: 1;
+}
+.star:hover { background: var(--surface-2); color: var(--star); }
+.star.on { color: var(--star); }
+
+.acts { display: flex; align-items: center; gap: 2px; }
+.cp {
+  border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+  font-size: 12px; padding: 3px 8px; border-radius: 6px; cursor: pointer; white-space: nowrap;
+  opacity: 0; transition: opacity .1s;
+}
+.row:hover .cp, .row.active .cp { opacity: 1; }
+.cp:hover { color: var(--accent); border-color: var(--accent); }
+@media (hover: none) { .cp { opacity: 1; } }
+.empty { padding: 26px 14px; text-align: center; color: var(--muted); }
+.more { display: block; width: 100%; padding: 11px; border: 0; border-top: 1px solid var(--border); background: var(--surface); color: var(--accent); cursor: pointer; font-size: 14px; }
+.more:hover { background: var(--surface-2); }
+.hint { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+kbd { font-family: ui-monospace, Consolas, monospace; font-size: 12px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; background: var(--surface); }
+
+footer { color: var(--muted); font-size: 12px; padding: 16px 0 30px; border-top: 1px solid var(--border); }
+footer a { color: inherit; }
+
+#toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+  background: var(--text); color: var(--bg);
+  padding: 9px 16px; border-radius: 10px; font-size: 14px;
+  opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.topbar .brand { margin-bottom: 0; }
+
+.btn { border: 0; background: var(--accent); color: var(--accent-text); border-radius: 10px; padding: 9px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn:disabled { opacity: .6; cursor: default; }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); }
+.btn.danger { background: transparent; color: #d14343; border: 1px solid var(--border); }
+.small { font-size: 12px; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); }
+.card p { margin: 0 0 12px; }
+.reason { display: block; font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+.conf { font-size: 11px; font-weight: 600; border-radius: 4px; padding: 1px 6px; margin-left: 6px; white-space: nowrap; }
+.conf.vysoka { background: rgba(34, 160, 107, .15); color: #1a8a5a; }
+.conf.stredni { background: rgba(232, 162, 0, .16); color: #a86f00; }
+.conf.nizka { background: var(--surface-2); color: var(--muted); }
+.note { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--star); border-radius: 8px; padding: 9px 12px; font-size: 14px; margin-bottom: 12px; }
+.note.error { border-left-color: #d14343; }
+
+[hidden] { display: none !important; }
+.seg { margin-bottom: 14px; }
+.seg-src { font-size: 13.5px; color: var(--muted); margin: 0 0 6px 2px; font-style: italic; }
+.seg-src .badge { font-style: normal; }
+.view-tabs { display: inline-flex; gap: 2px; padding: 3px; margin: 0 0 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; }
+.view-tab { border: 0; background: transparent; color: var(--muted); padding: 5px 12px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.view-tab.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.empty-row { padding: 10px 14px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13.5px; }
+.list > .empty-row:first-child { border-top: 0; }
+.gloss { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
+.gloss > summary { cursor: pointer; padding: 11px 14px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.gloss > .hint { margin: 0 14px 10px; }
+.gl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 4px 18px; padding: 0 14px 14px; font-size: 13.5px; }
+.gl b { font-family: ui-monospace, Consolas, monospace; color: var(--accent); margin-right: 4px; }
+.gl-code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
+.seg-skip { font-size: 12.5px; color: var(--muted); margin: 0 0 10px 2px; opacity: .8; }
+
+/* collapsible chapter groups, each with its own rainbow hue (--h set inline) */
+.grp { border-top: 1px solid var(--border); }
+.list > .grp:first-child { border-top: 0; }
+.grp > summary {
+  display: flex; align-items: center; gap: 10px;
+  list-style: none; cursor: pointer; user-select: none;
+  padding: 10px 14px;
+  font-size: 14px; font-weight: 600;
+  background: hsl(var(--h) 65% 92%);
+  color: hsl(var(--h) 35% 28%);
+  border-left: 6px solid hsl(var(--h) 50% 70%);
+}
+.grp > summary::-webkit-details-marker { display: none; }
+.grp > summary::before { content: "\25B8"; display: inline-block; transition: transform .15s; }
+.grp[open] > summary::before { transform: rotate(90deg); }
+.grp > summary:hover { background: hsl(var(--h) 65% 88%); }
+.grp > summary .cnt { margin-left: auto; font-size: 12px; font-weight: 500; opacity: .75; }
+.grp > .row { border-left: 6px solid hsl(var(--h) 50% 70% / .45); }
+.sec-head .links { display: flex; gap: 6px; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .grp > summary { background: hsl(var(--h) 22% 21%); color: hsl(var(--h) 50% 80%); border-left-color: hsl(var(--h) 35% 50%); }
+  :root:not([data-theme="light"]) .grp > summary:hover { background: hsl(var(--h) 22% 25%); }
+}
+:root[data-theme="dark"] .grp > summary { background: hsl(var(--h) 22% 21%); color: hsl(var(--h) 50% 80%); border-left-color: hsl(var(--h) 35% 50%); }
+:root[data-theme="dark"] .grp > summary:hover { background: hsl(var(--h) 22% 25%); }
+.theme-btn {
+  width: 36px; height: 36px; flex: none;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface); color: var(--text);
+  font-size: 17px; line-height: 1; cursor: pointer;
+}
+.theme-btn:hover { border-color: var(--accent); }
+
+@media (max-width: 560px) {
+  .topbar { flex-wrap: wrap; }
+  .tab { padding: 6px 9px; }
+  .row { grid-template-columns: 64px 1fr auto; gap: 6px; padding-left: 10px; }
+  .chip .nm { max-width: 120px; }
+  .brand span { display: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand"><h1>MKN-10 tahák</h1><span>diagnózy pro ambulanci praktického lékaře</span></div>
+      <button class="theme-btn" id="themeBtn"></button>
+    </div>
+    <div class="search" id="searchBox">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <textarea id="q" rows="1" autocomplete="off" spellcheck="false" placeholder="Hledat diagnózu nebo kód, nebo vložit celý text s více diagnózami" autofocus></textarea>
+      <button id="clear" title="Vymazat (Esc)">&times;</button>
+    </div>
+    <div id="favBar"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="main"></div>
+
+</main>
+
+
+<footer class="wrap">
+  Kliknutím na řádek zkopírujete kód do schránky, tlačítkem „kód + název“ i s názvem diagnózy. Hvězdičkou si diagnózu připnete nahoru.
+  Klávesy: <kbd>/</kbd> hledat, <kbd>↑</kbd><kbd>↓</kbd> pohyb, <kbd>Enter</kbd> kopírovat kód, <kbd>Shift</kbd>+<kbd>Enter</kbd> kód i název, <kbd>Esc</kbd> vymazat.<br><br>
+  Zdroj dat: ÚZIS ČR, číselník MKN-10-CZ ({{COUNT}} kódů, stav k {{DATE}}), licence
+  <a href="https://creativecommons.org/licenses/by/4.0/deed.cs" target="_blank" rel="noopener">CC BY 4.0</a>.
+  Vložený text s více diagnózami se rozdělí na části a ke každé se najdou nejpodobnější kódy podle shody slov. Jde jen o pomůcku, kód vždy zkontrolujte.<br>
+  Kapitola XX (vnější příčiny, V01-Y98) není zahrnuta. Oblíbené a historie se ukládají jen v tomto prohlížeči.
+</footer>
+
+<div id="toast"></div>
+
+<script>
+const DATA = /*DATA*/;
+const CHAPTERS = /*CHAPTERS*/;
+const COMMON = /*COMMON*/;
+
+const PAGE = 60;
+const RECENT_MAX = 5;
+
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+// 1:1 character mapping so match indices can be used to highlight the original text
+const searchable = s => " " + norm(s).replace(/[^a-z0-9]/g, " ");
+
+const items = DATA.map(([code, name, ch, group, alias]) => ({
+  code, name, ch, group,
+  key: code.toLowerCase().replace(".", ""),
+  text: searchable(name),
+  alt: alias ? searchable(alias) : "", // extra search words (colloquial names), not displayed
+}));
+const byCode = new Map(items.map(it => [it.code, it]));
+const commonSet = new Set(COMMON);
+// cheat-sheet chapters in display order, each with a pastel hue from a fixed shuffled list
+const PASTEL_HUES = [205, 25, 145, 285, 55, 335, 105, 245, 5, 175, 315, 40, 265, 125, 300, 80, 225, 160];
+const COMMON_GROUPS = [...new Set(COMMON.map(c => byCode.get(c).ch))].map((ch, i, all) => ({
+  ch,
+  hue: PASTEL_HUES[i % PASTEL_HUES.length],
+  codes: COMMON.filter(c => byCode.get(c).ch === ch),
+}));
+const openGroups = new Set(); // all collapsed by default
+
+// ---------- storage ----------
+const store = {
+  get(k, def) { try { const v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : def; } catch { return def; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const cfg = {
+  get(k) { try { return localStorage.getItem(k) || ""; } catch { return ""; } },
+  set(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch {} },
+};
+let favs = store.get("mkn10.fav", []).filter(c => byCode.has(c));
+let recent = store.get("mkn10.recent", []).filter(c => byCode.has(c)).slice(0, RECENT_MAX);
+const isFav = c => favs.includes(c);
+
+function toggleFav(code) {
+  favs = isFav(code) ? favs.filter(c => c !== code) : [...favs, code];
+  store.set("mkn10.fav", favs);
+  renderFavBar();
+  render(false);
+}
+function pushRecent(code) {
+  recent = [code, ...recent.filter(c => c !== code)].slice(0, RECENT_MAX);
+  store.set("mkn10.recent", recent);
+}
+
+// ---------- search ----------
+function search(q) {
+  const tokens = searchable(q).trim().split(/\s+/).filter(Boolean);
+  if (!tokens.length) return [];
+  const codeQ = norm(q).replace(/[\s.]/g, "");
+  const codeLike = /^[a-z]\d/.test(codeQ);
+  const out = [];
+  for (const it of items) {
+    let score = 0;
+    if (codeLike) {
+      if (it.key === codeQ) score = 1000;
+      else if (it.key.startsWith(codeQ)) score = 900 - it.key.length * 5;
+    }
+    if (!score) {
+      let ok = true;
+      for (const t of tokens) {
+        if (it.text.includes(t)) score += it.text.includes(" " + t) ? 30 : 6;
+        else if (it.alt.includes(t)) score += it.alt.includes(" " + t) ? 28 : 5;
+        else { ok = false; break; }
+      }
+      if (!ok) continue;
+      if (it.text.startsWith(" " + tokens[0])) score += 25;
+      score -= it.name.length / 40;
+    }
+    if (commonSet.has(it.code)) score += 5;
+    if (isFav(it.code)) score += 10;
+    out.push([score, it]);
+  }
+  out.sort((a, b) => b[0] - a[0] || a[1].code.localeCompare(b[1].code));
+  return out.map(x => x[1]);
+}
+
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function highlight(it, q) {
+  const tokens = searchable(q).trim().split(/\s+/).filter(Boolean);
+  if (!tokens.length) return esc(it.name);
+  const marks = new Array(it.name.length).fill(false);
+  for (const t of tokens) {
+    let i = it.text.indexOf(" " + t);
+    i = i >= 0 ? i + 1 : it.text.indexOf(t);
+    if (i < 0) continue;
+    for (let k = 0; k < t.length; k++) marks[i - 1 + k] = true; // text has a leading space
+  }
+  let html = "", open = false;
+  for (let i = 0; i < it.name.length; i++) {
+    if (marks[i] !== open) { html += marks[i] ? "<mark>" : "</mark>"; open = marks[i]; }
+    html += esc(it.name[i]);
+  }
+  return open ? html + "</mark>" : html;
+}
+
+// ---------- rendering ----------
+const $q = document.getElementById("q");
+const $main = document.getElementById("main");
+const $favBar = document.getElementById("favBar");
+const $clear = document.getElementById("clear");
+let results = [], shown = PAGE, active = -1;
+
+function rowHtml(it, q, showChapter, badge = "", sub = "") {
+  const ch = CHAPTERS[it.ch];
+  return `<div class="row" data-code="${it.code}">
+    <span class="code">${it.code}</span>
+    <span class="name">${highlight(it, q || "")}${it.group ? '<span class="badge" title="Kód má podrobnější podkódy">skupina</span>' : ""}${badge}${sub}${showChapter ? `<span class="ch">${ch[0]}. ${ch[2]}</span>` : ""}</span>
+    <span class="acts"><button class="cp" data-full="${it.code}" title="Kopírovat kód i název (Shift+Enter)">kód + název</button><button class="star ${isFav(it.code) ? "on" : ""}" data-star="${it.code}" title="${isFav(it.code) ? "Odebrat z oblíbených" : "Přidat do oblíbených"}">${isFav(it.code) ? "★" : "☆"}</button></span>
+  </div>`;
+}
+
+function renderFavBar() {
+  if (!favs.length) { $favBar.innerHTML = ""; return; }
+  const sorted = [...favs].sort((a, b) => a.localeCompare(b));
+  $favBar.innerHTML = '<span class="favLabel">★ Oblíbené</span>' + sorted.map(c => {
+    const it = byCode.get(c);
+    return `<span class="chip" data-code="${c}" title="${esc(it.name)}"><b>${c}</b><span class="nm">${esc(it.name)}</span><button class="x" data-star="${c}" title="Odebrat z oblíbených">&times;</button></span>`;
+  }).join("");
+}
+
+function recentHtml() {
+  if (!recent.length) return "";
+  return `<section><div class="sec-head"><h2>Naposledy použité</h2><button class="link" id="clearRecent">Vymazat historii</button></div>
+    <div class="list">${recent.map(c => rowHtml(byCode.get(c), "", false)).join("")}</div></section>`;
+}
+
+function render(resetPaging = true) {
+  const q = $q.value.trim();
+  $clear.style.display = q ? "block" : "none";
+  if (resetPaging) { shown = PAGE; active = -1; }
+
+  if (!q) {
+    results = [];
+    let html = recentHtml();
+    if (!favs.length) html += `<p class="hint">Tip: hvězdičkou ☆ si připnete diagnózu, pak bude vždy nahoře pod vyhledáváním.</p>`;
+    const groups = COMMON_GROUPS.map(g => `<details class="grp" data-ch="${g.ch}" style="--h:${g.hue}"${openGroups.has(g.ch) ? " open" : ""}>
+      <summary>${CHAPTERS[g.ch][0]}. ${CHAPTERS[g.ch][2]}<span class="cnt">${g.codes.length}</span></summary>
+      ${g.codes.map(c => rowHtml(byCode.get(c), "", false)).join("")}</details>`).join("");
+    html += `<section><div class="sec-head"><h2>Časté v ambulanci PL (${COMMON.length})</h2>
+      <span class="links"><button class="link" id="expandAll">Rozbalit vše</button><button class="link" id="collapseAll">Sbalit vše</button></span></div>
+      <div class="list">${groups}</div></section>` + glossaryHtml();
+    $main.innerHTML = html;
+    return;
+  }
+
+  const segs = segment(q);
+  if (segs.length > 1) { results = []; renderAnalysis(segs); return; }
+  results = search(q);
+  if (!results.length) { renderAnalysis(segs, true); return; }
+  const slice = results.slice(0, shown);
+  $main.innerHTML = `<section><div class="sec-head"><h2>Výsledky (${results.length})</h2></div>
+    <div class="list">${slice.map(it => rowHtml(it, q, true)).join("")}
+    ${results.length > shown ? `<button class="more" id="more">Zobrazit další (${results.length - shown})</button>` : ""}</div></section>`;
+  setActive(active);
+}
+
+// rows inside collapsed groups are skipped by keyboard navigation
+const visibleRows = () => [...$main.querySelectorAll(".row")].filter(r => !r.closest("details:not([open])"));
+
+function setActive(i) {
+  const rows = visibleRows();
+  rows.forEach(r => r.classList.remove("active"));
+  active = Math.max(-1, Math.min(i, rows.length - 1));
+  if (active >= 0) { rows[active].classList.add("active"); rows[active].scrollIntoView({ block: "nearest" }); }
+}
+
+// ---------- actions ----------
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 1400);
+}
+
+async function copyCode(code, full = false) {
+  const text = full ? `${code} ${byCode.get(code).name}` : code;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand("copy"); ta.remove();
+  }
+  pushRecent(code);
+  toast(`Zkopírováno: ${text}`);
+  if (!$q.value.trim()) render(false);
+  $q.focus(); $q.select(); // ready for the next query or paste
+}
+
+/*ANALYSIS*/
+
+document.addEventListener("click", e => {
+  const star = e.target.closest("[data-star]");
+  if (star) { e.stopPropagation(); toggleFav(star.dataset.star); return; }
+  const full = e.target.closest("[data-full]");
+  if (full) { e.stopPropagation(); copyCode(full.dataset.full, true); return; }
+  const view = e.target.closest("[data-view]");
+  if (view) { analysisView = view.dataset.view; cfg.set("mkn10.view", analysisView); render(false); return; }
+  if (e.target.id === "copyBest" || e.target.id === "copyBestFull") { copyBest(e.target.id === "copyBestFull"); return; }
+  const manual = e.target.closest("[data-manual]");
+  if (manual) { $q.value = manual.dataset.manual; autosize(); render(); $q.focus(); return; }
+  if (e.target.id === "more") { shown += PAGE; render(false); return; }
+  if (e.target.id === "expandAll") { COMMON_GROUPS.forEach(g => openGroups.add(g.ch)); render(false); return; }
+  if (e.target.id === "collapseAll") { openGroups.clear(); render(false); return; }
+  if (e.target.id === "clearRecent") { recent = []; store.set("mkn10.recent", recent); render(); return; }
+  const row = e.target.closest("[data-code]");
+  if (row) copyCode(row.dataset.code);
+});
+
+// remember which groups are open so re-rendering (e.g. after starring) keeps them open
+document.addEventListener("toggle", e => {
+  const d = e.target;
+  if (d.classList && d.classList.contains("gloss")) { glossOpen = d.open; return; }
+  if (!d.classList || !d.classList.contains("grp")) return;
+  d.open ? openGroups.add(+d.dataset.ch) : openGroups.delete(+d.dataset.ch);
+}, true);
+
+let debounce;
+function autosize() {
+  $q.style.height = "auto";
+  $q.style.height = $q.scrollHeight + 3 + "px";
+}
+$q.addEventListener("input", () => { autosize(); clearTimeout(debounce); debounce = setTimeout(render, 80); });
+$clear.addEventListener("click", () => { $q.value = ""; autosize(); render(); $q.focus(); });
+
+
+document.addEventListener("keydown", e => {
+  const t = e.target;
+  if (t.tagName === "SELECT" || t.tagName === "INPUT") return;
+  if (e.key === "/" && document.activeElement !== $q) { e.preventDefault(); $q.focus(); $q.select(); return; }
+  if (e.key === "Escape") { $q.value = ""; autosize(); render(); $q.focus(); return; }
+  if (e.key === "ArrowDown") { e.preventDefault(); setActive(active + 1); return; }
+  if (e.key === "ArrowUp") { e.preventDefault(); setActive(active - 1); return; }
+  if (e.key === "Enter") {
+    e.preventDefault(); // Enter copies, it does not add a line to the search box
+    const row = visibleRows()[active >= 0 ? active : 0];
+    if (row) copyCode(row.dataset.code, e.shiftKey);
+  }
+});
+
+// the AI feature and the tabs were removed: forget what older versions saved
+["mkn10.openai.key", "mkn10.openai.model", "mkn10.mode"].forEach(k => cfg.set(k, ""));
+// ---------- light / dark mode ----------
+const $themeBtn = document.getElementById("themeBtn");
+const darkMq = window.matchMedia("(prefers-color-scheme: dark)");
+const isDark = () => (document.documentElement.dataset.theme || (darkMq.matches ? "dark" : "light")) === "dark";
+function paintThemeBtn() {
+  $themeBtn.textContent = isDark() ? "\u2600" : "\u263E"; // sun / moon
+  $themeBtn.title = isDark() ? "Přepnout na světlý režim" : "Přepnout na tmavý režim";
+}
+$themeBtn.addEventListener("click", () => {
+  const t = isDark() ? "light" : "dark";
+  document.documentElement.dataset.theme = t;
+  cfg.set("mkn10.theme", t);
+  paintThemeBtn();
+});
+darkMq.addEventListener("change", paintThemeBtn);
+paintThemeBtn();
+
+renderFavBar();
+render();
+$q.focus();
+setTimeout(() => { if (!IDX) buildIndex(); }, 300); // ready before the first paste
+</script>
+</body>
+</html>

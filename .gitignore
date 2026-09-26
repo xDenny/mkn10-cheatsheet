@@ -1,0 +1,7 @@
+# Real (anonymised) patient records used as test input - the repository is public, keep them local only.
+tests/examples/
+tests/snapshot.txt
+
+node_modules/
+__pycache__/
+*.tmp
