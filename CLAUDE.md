@@ -28,7 +28,7 @@ Webová pomůcka pro **praktického lékaře**, kterou pro něj připravuje uži
 | `src/template.html` | HTML, CSS a JS aplikace (vyhledávání, oblíbené, historie, kategorie, tmavý režim, UI rozboru). Zástupné značky `/*DATA*/`, `/*CHAPTERS*/`, `/*COMMON*/`, `/*ANALYSIS*/`, `{{COUNT}}`, `{{DATE}}` |
 | `src/analysis.js` | **Rozbor volného textu** a **slovník zkratek/synonym** (vkládá se do šablony) |
 | `data/mkn10-cz.csv` | Oficiální číselník MKN-10-CZ (NZIP / ÚZIS, CC BY 4.0). Zdroj: https://data.mzcr.cz/data/distribuce/463/Otevrena-data-OIS-12-03-ciselnik-mkn-10-cz.csv |
-| `data/MKN-10_prakticky_lekar.docx` | Doktorův seznam častých diagnóz (tabulka kód / název, 256 unikátních kódů) → sekce „Časté v ambulanci PL" |
+| `data/MKN-10_prakticky_lekar.docx` | Doktorův seznam častých diagnóz (tabulka kód / název, 393 unikátních kódů) → sekce „Časté v ambulanci PL" |
 | `tests/run.js` | Regresní test rozboru a hledání proti `index.html` |
 | `tests/examples/*.txt`, `tests/snapshot.txt` | **Jen lokálně** (v `.gitignore`): skutečné anonymizované zápisy pacientů, repozitář je veřejný |
 
@@ -83,5 +83,5 @@ Vizuální kontrola: Edge headless (`"C:/Program Files (x86)/Microsoft/Edge/Appl
 
 ## Historie
 
-- Původně Word dokument se ~115 častými kódy (moje verze, názvy nebyly oficiální); doktor ho rozšířil na 257 řádků (`data/MKN-10_prakticky_lekar.docx`).
+- Původně Word dokument se ~115 častými kódy (moje verze, názvy nebyly oficiální); doktor ho rozšířil na 257 řádků, v září 2026 na 394 řádků (přibyly hlavně kapitoly L, M, N, O, R, T, U, Z; ubyly Z09.8 a Z76.0) (`data/MKN-10_prakticky_lekar.docx`).
 - Webová aplikace: vyhledávání → oblíbené/historie → AI režim přes OpenAI API (odstraněn) → offline rozbor textu sloučený do hlavního pole → pastelové kategorie, přepínač pohledů, slovník zkratek, tmavý režim → GitHub Pages → přejmenování na „MKN-10", zobrazený slovník zkratek odstraněn.

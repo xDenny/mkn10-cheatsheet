@@ -318,7 +318,7 @@ const items = DATA.map(([code, name, ch, group, alias]) => ({
 const byCode = new Map(items.map(it => [it.code, it]));
 const commonSet = new Set(COMMON);
 // cheat-sheet chapters in display order, each with a pastel hue from a fixed shuffled list
-const PASTEL_HUES = [205, 25, 145, 285, 55, 335, 105, 245, 5, 175, 315, 40, 265, 125, 300, 80, 225, 160];
+const PASTEL_HUES = [205, 25, 145, 285, 55, 335, 105, 245, 5, 175, 315, 40, 265, 125, 300, 80, 225, 160, 350, 190];
 const COMMON_GROUPS = [...new Set(COMMON.map(c => byCode.get(c).ch))].map((ch, i, all) => ({
   ch,
   hue: PASTEL_HUES[i % PASTEL_HUES.length],
