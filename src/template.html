@@ -180,6 +180,19 @@ mark { background: var(--mark); color: inherit; border-radius: 2px; }
 .more { display: block; width: 100%; padding: 11px; border: 0; border-top: 1px solid var(--border); background: var(--surface); color: var(--accent); cursor: pointer; font-size: 14px; }
 .more:hover { background: var(--surface-2); }
 .hint { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+.favio { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin: 0 0 14px; }
+.favio .hint { margin: 0; }
+.favio .links { margin-left: auto; font-size: 13px; color: var(--muted); }
+
+#favDlg { width: min(520px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); color: var(--text); box-shadow: 0 10px 40px rgba(0, 0, 0, .25); }
+#favDlg::backdrop { background: rgba(0, 0, 0, .4); }
+#favDlg h3 { margin: 0 0 6px; font-size: 16px; }
+#favDlg p { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+#favDlg textarea { box-sizing: border-box; width: 100%; height: 120px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); font: 12px/1.4 ui-monospace, Consolas, monospace; word-break: break-all; resize: vertical; }
+#favDlg textarea:focus { outline: none; border-color: var(--accent); }
+#favDlg .dlg-err { color: #c0392b; min-height: 1em; margin: 6px 0 0; }
+#favDlg .dlg-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+#favDlg .btn.sec { background: var(--surface-2); color: var(--text); }
 kbd { font-family: ui-monospace, Consolas, monospace; font-size: 12px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; background: var(--surface); }
 
 footer { color: var(--muted); font-size: 12px; padding: 16px 0 30px; border-top: 1px solid var(--border); }
@@ -292,10 +305,18 @@ footer a { color: inherit; }
   Zdroj dat: ÚZIS ČR, číselník MKN-10-CZ ({{COUNT}} kódů, stav k {{DATE}}), licence
   <a href="https://creativecommons.org/licenses/by/4.0/deed.cs" target="_blank" rel="noopener">CC BY 4.0</a>.
   Vložený text s více diagnózami se rozdělí na části a ke každé se najdou nejpodobnější kódy podle shody slov. Jde jen o pomůcku, kód vždy zkontrolujte.<br>
-  Kapitola XX (vnější příčiny, V01-Y98) není zahrnuta. Oblíbené a historie se ukládají jen v tomto prohlížeči.
+  Kapitola XX (vnější příčiny, V01-Y98) není zahrnuta. Oblíbené a historie se ukládají jen v tomto prohlížeči, oblíbené lze na jiný počítač přenést přes Export / Import.
 </footer>
 
 <div id="toast"></div>
+
+<dialog id="favDlg">
+  <h3 id="favDlgTitle"></h3>
+  <p id="favDlgText"></p>
+  <textarea id="favDlgCode" spellcheck="false"></textarea>
+  <p class="dlg-err" id="favDlgErr"></p>
+  <div class="dlg-btns"><button class="btn sec" id="favDlgClose">Zavřít</button><button class="btn" id="favDlgOk"></button></div>
+</dialog>
 
 <script>
 const DATA = /*DATA*/;
@@ -441,7 +462,8 @@ function render(resetPaging = true) {
   if (!q) {
     results = [];
     let html = recentHtml();
-    if (!favs.length) html += `<p class="hint">Tip: hvězdičkou ☆ si připnete diagnózu, pak bude vždy nahoře pod vyhledáváním.</p>`;
+    html += `<div class="favio">${favs.length ? "" : `<p class="hint">Tip: hvězdičkou ☆ si připnete diagnózu, pak bude vždy nahoře pod vyhledáváním.</p>`}
+      <span class="links">Oblíbené:${favs.length ? '<button class="link" id="favExport">Exportovat</button>' : ""}<button class="link" id="favImport">Importovat</button></span></div>`;
     const groups = COMMON_GROUPS.map(g => `<details class="grp" data-ch="${g.ch}" style="--h:${g.hue}"${openGroups.has(g.ch) ? " open" : ""}>
       <summary>${CHAPTERS[g.ch][0]}. ${CHAPTERS[g.ch][2]}<span class="cnt">${g.codes.length}</span></summary>
       ${g.codes.map(c => rowHtml(byCode.get(c), "", false)).join("")}</details>`).join("");
@@ -513,6 +535,8 @@ document.addEventListener("click", e => {
   if (e.target.id === "more") { shown += PAGE; render(false); return; }
   if (e.target.id === "expandAll") { COMMON_GROUPS.forEach(g => openGroups.add(g.ch)); render(false); return; }
   if (e.target.id === "collapseAll") { openGroups.clear(); render(false); return; }
+  if (e.target.id === "favExport") { openFavDlg(true); return; }
+  if (e.target.id === "favImport") { openFavDlg(false); return; }
   if (e.target.id === "clearRecent") { recent = []; store.set("mkn10.recent", recent); render(); return; }
   const row = e.target.closest("[data-code]");
   if (row) copyCode(row.dataset.code);
@@ -536,7 +560,7 @@ $clear.addEventListener("click", () => { $q.value = ""; autosize(); render(); $q
 
 document.addEventListener("keydown", e => {
   const t = e.target;
-  if (t.tagName === "SELECT" || t.tagName === "INPUT") return;
+  if (t.tagName === "SELECT" || t.tagName === "INPUT" || t.closest("dialog")) return;
   if (e.key === "/" && document.activeElement !== $q) { e.preventDefault(); $q.focus(); $q.select(); return; }
   if (e.key === "Escape") { $q.value = ""; autosize(); render(); $q.focus(); return; }
   if (e.key === "ArrowDown") { e.preventDefault(); setActive(active + 1); return; }
@@ -547,6 +571,57 @@ document.addEventListener("keydown", e => {
     if (row) copyCode(row.dataset.code, e.shiftKey);
   }
 });
+
+// ---------- favourites export / import (move them to another computer) ----------
+// the code is base64 of "MKN1:" + comma-separated codes; import also accepts a plain list of codes
+const FAV_PREFIX = "MKN1:";
+const $favDlg = document.getElementById("favDlg");
+const $favCode = document.getElementById("favDlgCode");
+const $favErr = document.getElementById("favDlgErr");
+const $favOk = document.getElementById("favDlgOk");
+let favDlgExport = true;
+
+function openFavDlg(isExport) {
+  favDlgExport = isExport;
+  document.getElementById("favDlgTitle").textContent = isExport ? `Export oblíbených (${favs.length})` : "Import oblíbených";
+  document.getElementById("favDlgText").textContent = isExport
+    ? "Zkopírujte tento kód a na druhém počítači ho vložte přes Oblíbené: Importovat."
+    : "Vložte kód z exportu. Stávající oblíbené se smažou a nahradí diagnózami z kódu.";
+  $favCode.value = isExport ? btoa(FAV_PREFIX + [...favs].sort((a, b) => a.localeCompare(b)).join(",")) : "";
+  $favCode.readOnly = isExport;
+  $favOk.textContent = isExport ? "Zkopírovat" : "Importovat";
+  $favErr.textContent = "";
+  $favDlg.showModal();
+  $favCode.focus();
+  if (isExport) $favCode.select();
+}
+
+function parseFavCode(text) {
+  let s = text.replace(/\s+/g, "");
+  try { const d = atob(s); if (d.startsWith(FAV_PREFIX)) s = d.slice(FAV_PREFIX.length); } catch {}
+  return [...new Set(s.toUpperCase().match(/[A-Z]\d{2}(\.\d{1,2})?/g) || [])];
+}
+
+$favOk.addEventListener("click", async () => {
+  if (favDlgExport) {
+    try { await navigator.clipboard.writeText($favCode.value); } catch { $favCode.select(); document.execCommand("copy"); }
+    $favDlg.close();
+    toast(`Kód zkopírován (oblíbených: ${favs.length})`);
+    return;
+  }
+  const codes = parseFavCode($favCode.value);
+  const known = codes.filter(c => byCode.has(c));
+  if (!known.length) { $favErr.textContent = "V kódu nejsou žádné platné diagnózy. Zkontrolujte, že je vložený celý."; return; }
+  favs = known; // replaces the current favourites
+  store.set("mkn10.fav", favs);
+  $favDlg.close();
+  renderFavBar();
+  render(false);
+  const skipped = codes.length - known.length;
+  toast(`Oblíbené nahrazeny, počet: ${known.length}` + (skipped ? `, neznámé kódy vynechány: ${skipped}` : ""));
+});
+document.getElementById("favDlgClose").addEventListener("click", () => $favDlg.close());
+$favDlg.addEventListener("close", () => $q.focus());
 
 // the AI feature and the tabs were removed: forget what older versions saved
 ["mkn10.openai.key", "mkn10.openai.model", "mkn10.mode"].forEach(k => cfg.set(k, ""));
