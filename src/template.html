@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MKN-10 tahák</title>
+<title>MKN-10</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230f766e'/><path d='M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z' fill='white'/></svg>">
 <script>try { const t = localStorage.getItem("mkn10.theme"); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
 <style>
@@ -220,12 +220,6 @@ footer a { color: inherit; }
 .view-tab.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
 .empty-row { padding: 10px 14px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13.5px; }
 .list > .empty-row:first-child { border-top: 0; }
-.gloss { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
-.gloss > summary { cursor: pointer; padding: 11px 14px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-.gloss > .hint { margin: 0 14px 10px; }
-.gl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 4px 18px; padding: 0 14px 14px; font-size: 13.5px; }
-.gl b { font-family: ui-monospace, Consolas, monospace; color: var(--accent); margin-right: 4px; }
-.gl-code { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
 .seg-skip { font-size: 12.5px; color: var(--muted); margin: 0 0 10px 2px; opacity: .8; }
 
 /* collapsible chapter groups, each with its own rainbow hue (--h set inline) */
@@ -274,7 +268,7 @@ footer a { color: inherit; }
 <header>
   <div class="wrap">
     <div class="topbar">
-      <div class="brand"><h1>MKN-10 tahák</h1><span>diagnózy pro ambulanci praktického lékaře</span></div>
+      <div class="brand"><h1>MKN-10</h1><span>diagnózy pro ambulanci praktického lékaře</span></div>
       <button class="theme-btn" id="themeBtn"></button>
     </div>
     <div class="search" id="searchBox">
@@ -453,7 +447,7 @@ function render(resetPaging = true) {
       ${g.codes.map(c => rowHtml(byCode.get(c), "", false)).join("")}</details>`).join("");
     html += `<section><div class="sec-head"><h2>Časté v ambulanci PL (${COMMON.length})</h2>
       <span class="links"><button class="link" id="expandAll">Rozbalit vše</button><button class="link" id="collapseAll">Sbalit vše</button></span></div>
-      <div class="list">${groups}</div></section>` + glossaryHtml();
+      <div class="list">${groups}</div></section>`;
     $main.innerHTML = html;
     return;
   }
@@ -527,7 +521,6 @@ document.addEventListener("click", e => {
 // remember which groups are open so re-rendering (e.g. after starring) keeps them open
 document.addEventListener("toggle", e => {
   const d = e.target;
-  if (d.classList && d.classList.contains("gloss")) { glossOpen = d.open; return; }
   if (!d.classList || !d.classList.contains("grp")) return;
   d.open ? openGroups.add(+d.dataset.ch) : openGroups.delete(+d.dataset.ch);
 }, true);

@@ -14,7 +14,7 @@ const stem = w => w.length <= 3 ? w
 const foldKeys = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [fold(k), v]));
 
 // ===== Dictionary of abbreviations and expressions (extend freely) =====
-// Each entry:  t = meaning shown in the glossary, x = words used for matching (default: t),
+// Each entry:  t = meaning (shown as the reason of a match), x = words used for matching (default: t),
 //   code = the usual code, offered first; mod = only refines a match (location, laterality...);
 //   only = (SYN) the original word itself is not matched; seq = code for an old fracture ("st.p. fr.").
 // ABBR entries match whole words, SYN entries match the start of a word (all inflected forms).
@@ -422,16 +422,6 @@ function renderAnalysis(segs, fallback = false) {
   }
   $main.innerHTML = html;
   setActive(active);
-}
-
-let glossOpen = false;
-function glossaryHtml() {
-  const rows = Object.entries(ABBR_RAW).filter(([, v]) => v.t)
-    .sort((a, b) => a[0].localeCompare(b[0], "cs", { sensitivity: "base" }))
-    .map(([k, v]) => `<div class="gl"><b>${esc(k)}</b> ${esc(v.t)}${v.code ? ` <span class="gl-code">${v.code}</span>` : ""}</div>`).join("");
-  return `<section><details class="gloss"${glossOpen ? " open" : ""}><summary>Slovník zkratek (${Object.keys(ABBR_RAW).length})</summary>
-    <p class="hint">Zkratky, kterým rozbor textu rozumí. U některých je uveden obvyklý kód, který se nabídne jako první.</p>
-    <div class="gl-grid">${rows}</div></details></section>`;
 }
 
 function copyBest(full) {

@@ -1,4 +1,4 @@
-# MKN-10 tahák: kontext projektu
+# MKN-10: kontext projektu
 
 Webová pomůcka pro **praktického lékaře**, kterou pro něj připravuje uživatel (Denis). Při zápisu z kontroly pacienta potřebuje rychle najít **kód diagnózy podle české MKN-10** a vložit ho do ambulantního programu. Dřív používal web Mediately, Word tabulku a ChatGPT. Komunikace s uživatelem probíhá **česky**.
 
@@ -13,6 +13,7 @@ Webová pomůcka pro **praktického lékaře**, kterou pro něj připravuje uži
 - Vše na jedné stránce, **bez záložek** (uživatel si výslovně nepřál přepínat). Jedno pole: krátký dotaz = hledání, vložený delší text = rozbor.
 - Kategorie častých diagnóz: rozbalovací, výchozí stav sbalené, **pastelové barvy v pevně promíchaném pořadí** (ne duha).
 - „Naposledy použité": max **5** položek, nová nahoře, nejstarší vypadne.
+- Název webu je jen **„MKN-10"** (bez „tahák").
 - Světlý / tmavý režim s přepínačem (výchozí podle systému, volba se pamatuje).
 - Výsledek rozboru ve dvou pohledech: „Nejlepší shody" (výchozí, kompaktní) a „Všechny možnosti".
 - „st.p.", „stp.", „St. p.", „s/p" = **stav po**: nikdy se nevyhledává, jen označí část jako anamnézu a začne novou část.
@@ -69,7 +70,7 @@ Vizuální kontrola: Edge headless (`"C:/Program Files (x86)/Microsoft/Edge/Appl
 6. **Nápovědy**: zkratky/synonyma s `code` (HT → I10, APPE → Z90.4, TEP/CKP → Z96.6...) se nabídnou první. Kód napsaný přímo v textu vyhrává vždy.
 7. Části bez obsahu (jen šum nebo jen upřesnění) se nezobrazují.
 
-**Slovník zkratek** (`ABBR_RAW`, 107 položek) se zobrazuje i v aplikaci (rozbalovací „Slovník zkratek" na hlavní stránce). Při přidávání: `t` = význam (zobrazí se), `x` = slova pro hledání (výchozí `t`), `code` = obvyklý kód (ověřit v `data/mkn10-cz.csv`!), `mod` = jen upřesnění. Pozor na kolize: ABBR klíče se porovnávají jen bez diakritiky (ne přes `fold`, jinak CKP = Cp, CC = předložka „k"); vyhnout se zkratkám shodným s běžnými slovy (TEN, Ca, Tu, RE, C, L byly odstraněny).
+**Slovník zkratek** (`ABBR_RAW`, 107 položek) se v aplikaci nezobrazuje (seznam dole na stránce uživatel nechtěl), zkratka se jen vysvětlí u výsledku („ICHS = ischemická choroba srdeční"). Při přidávání: `t` = význam (zobrazí se), `x` = slova pro hledání (výchozí `t`), `code` = obvyklý kód (ověřit v `data/mkn10-cz.csv`!), `mod` = jen upřesnění. Pozor na kolize: ABBR klíče se porovnávají jen bez diakritiky (ne přes `fold`, jinak CKP = Cp, CC = předložka „k"); vyhnout se zkratkám shodným s běžnými slovy (TEN, Ca, Tu, RE, C, L byly odstraněny).
 
 **Postup ladění nového příkladu od uživatele:** uložit text do `tests/examples/exN.txt`, `node tests/run.js --show`, projít chybné řádky, upravit `src/analysis.js` (nejčastěji slovník), `python build.py`, `node tests/run.js` (zkontrolovat, že se nerozbily starší příklady), `--update`. Kódy z „ideálního výsledku" vždy ověřit v CSV (bývají americké).
 
@@ -83,4 +84,4 @@ Vizuální kontrola: Edge headless (`"C:/Program Files (x86)/Microsoft/Edge/Appl
 ## Historie
 
 - Původně Word dokument se ~115 častými kódy (moje verze, názvy nebyly oficiální); doktor ho rozšířil na 257 řádků (`data/MKN-10_prakticky_lekar.docx`).
-- Webová aplikace: vyhledávání → oblíbené/historie → AI režim přes OpenAI API (odstraněn) → offline rozbor textu sloučený do hlavního pole → pastelové kategorie, přepínač pohledů, slovník zkratek, tmavý režim → GitHub Pages.
+- Webová aplikace: vyhledávání → oblíbené/historie → AI režim přes OpenAI API (odstraněn) → offline rozbor textu sloučený do hlavního pole → pastelové kategorie, přepínač pohledů, slovník zkratek, tmavý režim → GitHub Pages → přejmenování na „MKN-10", zobrazený slovník zkratek odstraněn.

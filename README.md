@@ -1,4 +1,4 @@
-# MKN-10 tahák
+# MKN-10
 
 Pomůcka pro ambulanci praktického lékaře: rychlé vyhledání kódu diagnózy podle české MKN-10.
 
