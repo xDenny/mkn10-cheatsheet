@@ -12,6 +12,7 @@ Webová pomůcka pro **praktického lékaře**, kterou pro něj připravuje uži
 - Nic se nesmí odesílat mimo prohlížeč (rozbor textu s údaji pacienta běží lokálně).
 - Vše na jedné stránce, **bez záložek** (uživatel si výslovně nepřál přepínat). Jedno pole: krátký dotaz = hledání, vložený delší text = rozbor.
 - Kategorie častých diagnóz: rozbalovací, výchozí stav sbalené, **pastelové barvy v pevně promíchaném pořadí** (ne duha).
+- Oblíbené: na širokém okně (od 1100 px) **pevný panel vlevo** jako seznam, na užším sbalitelný seznam nad obsahem (výchozí sbalený). Žádné tagy pod vyhledáváním. **Export / Import** přes base64 kód (`MKN1:` + kódy), import oblíbené **nahradí**.
 - „Naposledy použité": max **5** položek, nová nahoře, nejstarší vypadne.
 - Název webu je jen **„MKN-10"** (bez „tahák").
 - Světlý / tmavý režim s přepínačem (výchozí podle systému, volba se pamatuje).

@@ -104,24 +104,39 @@ header {
 }
 #clear:hover { background: var(--surface-2); }
 
-#favBar { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
-#favBar:empty { display: none; }
-.chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  max-width: 100%;
-  padding: 4px 6px 4px 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 13px;
-  cursor: pointer;
+/* favourites: a fixed panel left of the content on wide screens, a collapsible list above it otherwise */
+#favPanel { max-width: 880px; margin: 12px auto 0; padding: 0 16px 4px; }
+.fav-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+.fav-head { display: flex; align-items: center; gap: 6px; padding: 8px 10px 8px 12px; border-bottom: 1px solid var(--border); }
+.fav-box.collapsed .fav-head { border-bottom: 0; }
+.fav-title { border: 0; background: none; padding: 0; font: inherit; font-size: 13px; font-weight: 600; color: var(--star); cursor: pointer; }
+.fav-title::before { content: "\25BE\00a0"; color: var(--muted); }
+.fav-box.collapsed .fav-title::before { content: "\25B8\00a0"; }
+.fav-head .links { margin-left: auto; white-space: nowrap; }
+.fav-head .link { font-size: 12px; }
+.fav-box.collapsed .fav-list, .fav-box.collapsed .fav-empty { display: none; }
+.fav-list { overflow-y: auto; max-height: 50vh; }
+.fav { display: flex; align-items: center; gap: 8px; padding: 4px 6px 4px 12px; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--border); }
+.fav:last-child { border-bottom: 0; }
+.fav:hover { background: var(--active); }
+.fav b { font-family: ui-monospace, Consolas, monospace; color: var(--accent); min-width: 44px; }
+.fav .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+.fav .x { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 5px; border-radius: 6px; }
+.fav .x:hover { color: var(--text); background: var(--surface-2); }
+.fav-empty { margin: 0; padding: 10px 12px; font-size: 13px; color: var(--muted); }
+@media (min-width: 1100px) {
+  /* content moves right when there is not enough room for the panel on its left */
+  .wrap { margin-left: max(312px, calc((100vw - 880px) / 2)); margin-right: 0; }
+  #favPanel { position: fixed; z-index: 11; top: 16px; width: 280px; margin: 0; padding: 0;
+    left: calc(max(312px, (100vw - 880px) / 2) - 296px); }
+  .fav-box { display: flex; flex-direction: column; max-height: calc(100vh - 32px); }
+  .fav-title { cursor: default; }
+  .fav-box .fav-title::before, .fav-box.collapsed .fav-title::before { content: none; }
+  .fav-list { flex: 1; min-height: 0; max-height: none; }
+  .fav-box.collapsed .fav-list { display: block; }
+  .fav-box.collapsed .fav-empty { display: block; }
+  .fav-box.collapsed .fav-head { border-bottom: 1px solid var(--border); }
 }
-.chip:hover { border-color: var(--accent); }
-.chip b { font-family: ui-monospace, Consolas, monospace; color: var(--accent); }
-.chip .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; color: var(--muted); }
-.chip .x { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; padding: 0 3px; border-radius: 50%; }
-.chip .x:hover { color: var(--text); }
-.favLabel { font-size: 12px; color: var(--star); font-weight: 600; align-self: center; margin-right: 2px; }
 
 main { padding: 14px 0 40px; }
 section { margin-bottom: 22px; }
@@ -180,9 +195,6 @@ mark { background: var(--mark); color: inherit; border-radius: 2px; }
 .more { display: block; width: 100%; padding: 11px; border: 0; border-top: 1px solid var(--border); background: var(--surface); color: var(--accent); cursor: pointer; font-size: 14px; }
 .more:hover { background: var(--surface-2); }
 .hint { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
-.favio { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin: 0 0 14px; }
-.favio .hint { margin: 0; }
-.favio .links { margin-left: auto; font-size: 13px; color: var(--muted); }
 
 #favDlg { width: min(520px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); color: var(--text); box-shadow: 0 10px 40px rgba(0, 0, 0, .25); }
 #favDlg::backdrop { background: rgba(0, 0, 0, .4); }
@@ -272,7 +284,6 @@ footer a { color: inherit; }
   .topbar { flex-wrap: wrap; }
   .tab { padding: 6px 9px; }
   .row { grid-template-columns: 64px 1fr auto; gap: 6px; padding-left: 10px; }
-  .chip .nm { max-width: 120px; }
   .brand span { display: none; }
 }
 </style>
@@ -289,9 +300,10 @@ footer a { color: inherit; }
       <textarea id="q" rows="1" autocomplete="off" spellcheck="false" placeholder="Hledat diagnózu nebo kód, nebo vložit celý text s více diagnózami" autofocus></textarea>
       <button id="clear" title="Vymazat (Esc)">&times;</button>
     </div>
-    <div id="favBar"></div>
   </div>
 </header>
+
+<aside id="favPanel"></aside>
 
 <main class="wrap">
   <div id="main"></div>
@@ -300,7 +312,7 @@ footer a { color: inherit; }
 
 
 <footer class="wrap">
-  Kliknutím na řádek zkopírujete kód do schránky, tlačítkem „kód + název“ i s názvem diagnózy. Hvězdičkou si diagnózu připnete nahoru.
+  Kliknutím na řádek zkopírujete kód do schránky, tlačítkem „kód + název“ i s názvem diagnózy. Hvězdičkou si diagnózu přidáte do Oblíbených.
   Klávesy: <kbd>/</kbd> hledat, <kbd>↑</kbd><kbd>↓</kbd> pohyb, <kbd>Enter</kbd> kopírovat kód, <kbd>Shift</kbd>+<kbd>Enter</kbd> kód i název, <kbd>Esc</kbd> vymazat.<br><br>
   Zdroj dat: ÚZIS ČR, číselník MKN-10-CZ ({{COUNT}} kódů, stav k {{DATE}}), licence
   <a href="https://creativecommons.org/licenses/by/4.0/deed.cs" target="_blank" rel="noopener">CC BY 4.0</a>.
@@ -426,7 +438,7 @@ function highlight(it, q) {
 // ---------- rendering ----------
 const $q = document.getElementById("q");
 const $main = document.getElementById("main");
-const $favBar = document.getElementById("favBar");
+const $favPanel = document.getElementById("favPanel");
 const $clear = document.getElementById("clear");
 let results = [], shown = PAGE, active = -1;
 
@@ -439,13 +451,18 @@ function rowHtml(it, q, showChapter, badge = "", sub = "") {
   </div>`;
 }
 
+let favOpen = cfg.get("mkn10.favOpen") === "1"; // the list is collapsible only on narrow screens
 function renderFavBar() {
-  if (!favs.length) { $favBar.innerHTML = ""; return; }
   const sorted = [...favs].sort((a, b) => a.localeCompare(b));
-  $favBar.innerHTML = '<span class="favLabel">★ Oblíbené</span>' + sorted.map(c => {
+  const list = sorted.map(c => {
     const it = byCode.get(c);
-    return `<span class="chip" data-code="${c}" title="${esc(it.name)}"><b>${c}</b><span class="nm">${esc(it.name)}</span><button class="x" data-star="${c}" title="Odebrat z oblíbených">&times;</button></span>`;
+    return `<div class="fav" data-code="${c}" title="${c} ${esc(it.name)}"><b>${c}</b><span class="nm">${esc(it.name)}</span><button class="x" data-star="${c}" title="Odebrat z oblíbených">&times;</button></div>`;
   }).join("");
+  $favPanel.innerHTML = `<div class="fav-box${favOpen || !favs.length ? "" : " collapsed"}">
+    <div class="fav-head"><button class="fav-title" id="favToggle">★ Oblíbené (${favs.length})</button>
+      <span class="links">${favs.length ? '<button class="link" id="favExport">Export</button>' : ""}<button class="link" id="favImport">Import</button></span></div>
+    ${favs.length ? `<div class="fav-list">${list}</div>` : '<p class="fav-empty">Hvězdičkou ☆ u diagnózy si ji přidáte sem, kliknutím pak zkopírujete kód.</p>'}
+  </div>`;
 }
 
 function recentHtml() {
@@ -462,8 +479,6 @@ function render(resetPaging = true) {
   if (!q) {
     results = [];
     let html = recentHtml();
-    html += `<div class="favio">${favs.length ? "" : `<p class="hint">Tip: hvězdičkou ☆ si připnete diagnózu, pak bude vždy nahoře pod vyhledáváním.</p>`}
-      <span class="links">Oblíbené:${favs.length ? '<button class="link" id="favExport">Exportovat</button>' : ""}<button class="link" id="favImport">Importovat</button></span></div>`;
     const groups = COMMON_GROUPS.map(g => `<details class="grp" data-ch="${g.ch}" style="--h:${g.hue}"${openGroups.has(g.ch) ? " open" : ""}>
       <summary>${CHAPTERS[g.ch][0]}. ${CHAPTERS[g.ch][2]}<span class="cnt">${g.codes.length}</span></summary>
       ${g.codes.map(c => rowHtml(byCode.get(c), "", false)).join("")}</details>`).join("");
@@ -535,6 +550,7 @@ document.addEventListener("click", e => {
   if (e.target.id === "more") { shown += PAGE; render(false); return; }
   if (e.target.id === "expandAll") { COMMON_GROUPS.forEach(g => openGroups.add(g.ch)); render(false); return; }
   if (e.target.id === "collapseAll") { openGroups.clear(); render(false); return; }
+  if (e.target.id === "favToggle") { if (favs.length) { favOpen = !favOpen; cfg.set("mkn10.favOpen", favOpen ? "1" : ""); renderFavBar(); } return; }
   if (e.target.id === "favExport") { openFavDlg(true); return; }
   if (e.target.id === "favImport") { openFavDlg(false); return; }
   if (e.target.id === "clearRecent") { recent = []; store.set("mkn10.recent", recent); render(); return; }
@@ -585,7 +601,7 @@ function openFavDlg(isExport) {
   favDlgExport = isExport;
   document.getElementById("favDlgTitle").textContent = isExport ? `Export oblíbených (${favs.length})` : "Import oblíbených";
   document.getElementById("favDlgText").textContent = isExport
-    ? "Zkopírujte tento kód a na druhém počítači ho vložte přes Oblíbené: Importovat."
+    ? "Zkopírujte tento kód a na druhém počítači ho vložte přes Import u Oblíbených."
     : "Vložte kód z exportu. Stávající oblíbené se smažou a nahradí diagnózami z kódu.";
   $favCode.value = isExport ? btoa(FAV_PREFIX + [...favs].sort((a, b) => a.localeCompare(b)).join(",")) : "";
   $favCode.readOnly = isExport;
