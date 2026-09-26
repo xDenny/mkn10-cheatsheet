@@ -107,8 +107,7 @@ header {
 /* favourites: a fixed panel left of the content on wide screens, a collapsible list above it otherwise */
 #favPanel { max-width: 880px; margin: 12px auto 0; padding: 0 16px 4px; }
 .fav-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
-.fav-head { display: flex; align-items: center; gap: 6px; padding: 8px 10px 8px 12px; border-bottom: 1px solid var(--border); }
-.fav-box.collapsed .fav-head { border-bottom: 0; }
+.fav-head { display: flex; align-items: center; gap: 6px; padding: 8px 10px 8px 12px; }
 .fav-title { border: 0; background: none; padding: 0; font: inherit; font-size: 13px; font-weight: 600; color: var(--star); cursor: pointer; }
 .fav-title::before { content: "\25BE\00a0"; color: var(--muted); }
 .fav-box.collapsed .fav-title::before { content: "\25B8\00a0"; }
@@ -123,19 +122,34 @@ header {
 .fav .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
 .fav .x { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 5px; border-radius: 6px; }
 .fav .x:hover { color: var(--text); background: var(--surface-2); }
-.fav-empty { margin: 0; padding: 10px 12px; font-size: 13px; color: var(--muted); }
+.fav-empty { margin: 0; padding: 10px 12px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); }
+.fav-view { display: block; padding: 0 12px 6px; margin-top: -2px; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+.fav-view .link { font-size: 12px; }
+.fav-view .link.on { color: var(--text); font-weight: 600; cursor: default; text-decoration: none; }
+.fav-box.collapsed .fav-view { display: none; }
+/* "tags" view: chips flowing side by side, as the favourites used to look under the search box */
+.fav-list.tags { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 4px; padding: 7px; }
+.fav-list.tags .fav { padding: 2px 2px 2px 7px; gap: 4px; font-size: 12px; border: 1px solid var(--border); border-radius: 999px; max-width: 100%; }
+.fav-list.tags .fav:last-child { border-bottom: 1px solid var(--border); }
+.fav-list.tags .fav:hover { background: var(--surface); border-color: var(--accent); }
+.fav-list.tags .fav b { min-width: 0; font-size: 11.5px; }
+.fav-list.tags .fav .nm { flex: 0 1 auto; max-width: 120px; }
+.fav-list.tags .fav .x { font-size: 14px; padding: 0 3px; border-radius: 50%; }
+:root { --favw: 280px; }
+:root.fav-tags { --favw: clamp(280px, (100vw - 880px) / 2 - 32px, 480px); }
 @media (min-width: 1100px) {
   /* content moves right when there is not enough room for the panel on its left */
-  .wrap { margin-left: max(312px, calc((100vw - 880px) / 2)); margin-right: 0; }
-  #favPanel { position: fixed; z-index: 11; top: 16px; width: 280px; margin: 0; padding: 0;
-    left: calc(max(312px, (100vw - 880px) / 2) - 296px); }
+  .wrap { margin-left: max(var(--favw) + 32px, (100vw - 880px) / 2); margin-right: 0; }
+  #favPanel { position: fixed; z-index: 11; top: 16px; width: var(--favw); margin: 0; padding: 0;
+    left: calc(max(var(--favw) + 32px, (100vw - 880px) / 2) - var(--favw) - 16px); }
+  .fav-box.collapsed .fav-view { display: block; }
+  .fav-box.collapsed .fav-list.tags { display: flex; }
   .fav-box { display: flex; flex-direction: column; max-height: calc(100vh - 32px); }
   .fav-title { cursor: default; }
   .fav-box .fav-title::before, .fav-box.collapsed .fav-title::before { content: none; }
   .fav-list { flex: 1; min-height: 0; max-height: none; }
   .fav-box.collapsed .fav-list { display: block; }
   .fav-box.collapsed .fav-empty { display: block; }
-  .fav-box.collapsed .fav-head { border-bottom: 1px solid var(--border); }
 }
 
 main { padding: 14px 0 40px; }
@@ -452,16 +466,19 @@ function rowHtml(it, q, showChapter, badge = "", sub = "") {
 }
 
 let favOpen = cfg.get("mkn10.favOpen") === "1"; // the list is collapsible only on narrow screens
+let favTags = cfg.get("mkn10.favView") === "tags"; // list or tags, the doctor tries both
 function renderFavBar() {
   const sorted = [...favs].sort((a, b) => a.localeCompare(b));
   const list = sorted.map(c => {
     const it = byCode.get(c);
     return `<div class="fav" data-code="${c}" title="${c} ${esc(it.name)}"><b>${c}</b><span class="nm">${esc(it.name)}</span><button class="x" data-star="${c}" title="Odebrat z oblíbených">&times;</button></div>`;
   }).join("");
+  document.documentElement.classList.toggle("fav-tags", favTags && favs.length > 0);
   $favPanel.innerHTML = `<div class="fav-box${favOpen || !favs.length ? "" : " collapsed"}">
     <div class="fav-head"><button class="fav-title" id="favToggle">★ Oblíbené (${favs.length})</button>
       <span class="links">${favs.length ? '<button class="link" id="favExport">Export</button>' : ""}<button class="link" id="favImport">Import</button></span></div>
-    ${favs.length ? `<div class="fav-list">${list}</div>` : '<p class="fav-empty">Hvězdičkou ☆ u diagnózy si ji přidáte sem, kliknutím pak zkopírujete kód.</p>'}
+    ${favs.length ? `<div class="fav-view">Zobrazit: <button class="link${favTags ? "" : " on"}" data-favview="list">seznam</button> · <button class="link${favTags ? " on" : ""}" data-favview="tags">štítky</button></div>
+    <div class="fav-list${favTags ? " tags" : ""}">${list}</div>` : '<p class="fav-empty">Hvězdičkou ☆ u diagnózy si ji přidáte sem, kliknutím pak zkopírujete kód.</p>'}
   </div>`;
 }
 
@@ -551,6 +568,8 @@ document.addEventListener("click", e => {
   if (e.target.id === "expandAll") { COMMON_GROUPS.forEach(g => openGroups.add(g.ch)); render(false); return; }
   if (e.target.id === "collapseAll") { openGroups.clear(); render(false); return; }
   if (e.target.id === "favToggle") { if (favs.length) { favOpen = !favOpen; cfg.set("mkn10.favOpen", favOpen ? "1" : ""); renderFavBar(); } return; }
+  const fv = e.target.closest("[data-favview]");
+  if (fv) { favTags = fv.dataset.favview === "tags"; cfg.set("mkn10.favView", favTags ? "tags" : ""); renderFavBar(); return; }
   if (e.target.id === "favExport") { openFavDlg(true); return; }
   if (e.target.id === "favImport") { openFavDlg(false); return; }
   if (e.target.id === "clearRecent") { recent = []; store.set("mkn10.recent", recent); render(); return; }

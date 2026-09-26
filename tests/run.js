@@ -13,7 +13,7 @@ const js = html.split("<script>").pop().split("</script>")[0];
 // minimal browser stubs: the app script only needs these to load
 const el = () => ({ dataset: {}, value: "", hidden: false, style: {}, classList: { toggle() {}, add() {}, remove() {} },
   addEventListener() {}, focus() {}, select() {}, set innerHTML(v) {}, querySelectorAll: () => [] });
-global.document = { documentElement: { dataset: {} }, getElementById: el, querySelectorAll: () => [],
+global.document = { documentElement: { dataset: {}, classList: { toggle() {} } }, getElementById: el, querySelectorAll: () => [],
   addEventListener() {}, createElement: el, body: { appendChild() {} } };
 global.window = { matchMedia: () => ({ matches: false, addEventListener() {} }) };
 global.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
