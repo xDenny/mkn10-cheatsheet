@@ -154,6 +154,7 @@ header {
 
 main { padding: 14px 0 40px; }
 section { margin-bottom: 22px; }
+section.common { padding-top: 8px; }
 .sec-head { display: flex; align-items: center; justify-content: space-between; margin: 0 0 8px; }
 .sec-head h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0; }
 .link { border: 0; background: none; color: var(--accent); cursor: pointer; font-size: 13px; padding: 2px 4px; }
@@ -370,7 +371,11 @@ const COMMON_GROUPS = [...new Set(COMMON.map(c => byCode.get(c).ch))].map((ch, i
   ch,
   hue: PASTEL_HUES[i % PASTEL_HUES.length],
   codes: COMMON.filter(c => byCode.get(c).ch === ch),
-}));
+})).map(g => {
+  // letter range of the codes in the group, e.g. "C-D" for C15...D24
+  const a = g.codes[0][0], b = g.codes[g.codes.length - 1][0];
+  return { ...g, letters: a === b ? a : `${a}-${b}` };
+});
 const openGroups = new Set(); // all collapsed by default
 
 // ---------- storage ----------
@@ -497,9 +502,9 @@ function render(resetPaging = true) {
     results = [];
     let html = recentHtml();
     const groups = COMMON_GROUPS.map(g => `<details class="grp" data-ch="${g.ch}" style="--h:${g.hue}"${openGroups.has(g.ch) ? " open" : ""}>
-      <summary>${CHAPTERS[g.ch][0]}. ${CHAPTERS[g.ch][2]}<span class="cnt">${g.codes.length}</span></summary>
+      <summary>${CHAPTERS[g.ch][2]} (${g.letters})<span class="cnt">${g.codes.length}</span></summary>
       ${g.codes.map(c => rowHtml(byCode.get(c), "", false)).join("")}</details>`).join("");
-    html += `<section><div class="sec-head"><h2>Časté v ambulanci PL (${COMMON.length})</h2>
+    html += `<section class="common"><div class="sec-head"><h2>Časté v ambulanci PL (${COMMON.length})</h2>
       <span class="links"><button class="link" id="expandAll">Rozbalit vše</button><button class="link" id="collapseAll">Sbalit vše</button></span></div>
       <div class="list">${groups}</div></section>`;
     $main.innerHTML = html;
